@@ -1,22 +1,5 @@
 # AI_BOT_STREET_FIGHTER
-> pls add projetc description and structure
-May be, start by looking at the game files. Findout how characters behave then replace it with our logic
 
-> pls try to think where you will get this street fighter game
-Torrent! 
-
-> what dataset to build
-
-
-> what is gaming logic etc.
-Character A: key(action) - if hits(Character B) - reward
-
-> is it classification? object detection ? tracking ?
-I think it's Object detection. 
-
-> as this project is not particularly easy we need to touch base soon !!!
-
->>You can also choose teh opengym route but i don't se eanything bee done for now. :o
 
 
 # DESCRIPTION
