@@ -9,7 +9,7 @@ import pyautogui
 --Game's window should be opened in prefixed position and size every time(you can use winSize2 script)
 --Also find the correct coordinates for "mouse-clicking" that we need for opening the game
 --It had been trained only for RUY who is the easiest player to learn
-
+--Color channel is changed(in Gray scale) here because Enviroment needs Colored images for infering healths
 
 """
 movements={
