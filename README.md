@@ -1,4 +1,4 @@
-# Street fighter II BOT based on Enviroment captu
+# Street fighter II BOT based on Enviroment with Image Screenshot
 
 
 
