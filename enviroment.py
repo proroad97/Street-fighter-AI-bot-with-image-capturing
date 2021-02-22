@@ -10,7 +10,15 @@ import keyboard
 import cv2
 import subprocess
 
+"""
+A library that captures the game's state and sends "moves" to it. 
 
+Main issue is finding the proper times for pressing and releasing the "buttons" so on the game be able to applying the correct action that we want.
+Times for each move is based on the experimentation with the game and it is possibly that they will fail for others users.
+
+Also,sometimes when health goes to zero the game is not ended and the enviroment can handle this situation by waiting both healths become full. Furthermore,
+It can infer properly when there is a draw.
+"""
 
 def key_do(keys, frame_repeat=2):
         for key in keys:
@@ -30,7 +38,7 @@ def do_action(keys):
 class Enviroment():
     def __init__(self,coord):
         self.coordinates=coord
-        self.end_net=tf.keras.models.load_model(r"C:\Users\PROROAD\Desktop\fighter\loss.h5")#network which infer if you lost or win(based on in ther a "hand" on image)
+        self.end_net=tf.keras.models.load_model(r"\fighter\loss.h5")#network which infer if you lost or win(based on if there is a "hand" on the image)
         self.movements={
     "left":[["left"],0.30,0.0,0.50]
     ,"left-up":[["left","up"],0.30,0.0,0.85]
