@@ -1,4 +1,4 @@
-# AI_BOT_STREET_FIGHTER
+# Street fighter II BOT based on Enviroment captu
 
 
 
