@@ -21,6 +21,7 @@ It can infer properly when there is a draw.
 """
 
 def key_do(keys, frame_repeat=2):
+    #function for button pressing with the use of win32 api
         for key in keys:
             win32api.keybd_event(key,0,0,0)
         sleep(frame_repeat*0.2)
@@ -28,6 +29,7 @@ def key_do(keys, frame_repeat=2):
             win32api.keybd_event(key,0,win32con.KEYEVENTF_KEYUP,0)
 
 def do_action(keys):
+    #function for button pressing with the use of keyboard module"
         for i,key in enumerate(keys[0]):
             keyboard.press(key)
             if i!=2:sleep(keys[1])
@@ -35,10 +37,10 @@ def do_action(keys):
             keyboard.release(key)
             sleep(keys[2])
 
-class Enviroment():
+class Environment():
     def __init__(self,coord):
-        self.coordinates=coord
-        self.end_net=tf.keras.models.load_model(r"\fighter\loss.h5")#network which infer if you lost or win(based on if there is a "hand" on the image)
+        self.coordinates=coord#coordinates (x,y,w,h) of game's window
+        self.end_net=tf.keras.models.load_model(r"C:\Users\PROROAD\Desktop\fighter\loss.h5")#network which infer if you lost or win(based on if there is a "hand" on image)
         self.movements={
     "left":[["left"],0.30,0.0,0.50]
     ,"left-up":[["left","up"],0.30,0.0,0.85]
@@ -83,6 +85,10 @@ class Enviroment():
         return self.state
     
     def Open_game(self):
+        """
+        Opens game,load rom ,waits for the game to load and pause when we enter in the map
+
+        """
         def leftClick():
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
             sleep(.1)
@@ -119,6 +125,7 @@ class Enviroment():
     
 
     def take_state(self,infer=True):
+        #screenshot the game and calculate healths
         self.state=np.asarray(ImageGrab.grab(self.coordinates))
         if infer:
             health_ima= self.state[26:41,64:236,:]#coordinates of where health is
@@ -128,20 +135,27 @@ class Enviroment():
        
     
     def take_health(self,image):
+        #calculate health based on pixels
         #works only for  images on gray scale
         image=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         points=(image>128).sum() #yellow have a value bigger than 128
         health=points*100/np.prod(image.shape)
         return health
     
-    def set_gamma(self,ga):
-        self.gamma=ga
+    def set_gamma(self,gamma):
+        #discount coefficient 
+        self.gamma=gamma
 
     def set_policy_net(self,net,logits=False):
+        #set the network for calcuting policy
         self.policy_net=net
         self.logits=logits
 
     def n_steps(self,n=1):
+        """
+        Do N actions and calculate discounted reward 
+        Returns: Initial state,Final state,discounted reward,infos,first action
+        """
         rewards=0
         for i in range(n):
             if self.state is None:self.take_state()
@@ -164,21 +178,21 @@ class Enviroment():
         return ini_state,self.state,rewards,info,ini_action
 
 
-    def step(self,action):
+    def step(self,action,pause=True):
         if self.state is None:self.take_state()#if image is None(that is, we have a new episode) restart the state
         previous_state=self.state
         healths=[self.health,self.enemy_health]
-        key_do([32],frame_repeat=4)#continue game
-        sleep(0.25)
+        if pause: key_do([32],frame_repeat=4)#continue game
+        #sleep(0.25)
         do_action(action)
-        sleep(action[3])#waiting for the action completed(waiting time is specific for every action)
-        key_do([32],frame_repeat=1)#pause the game
+        if pause: sleep(action[3])#waiting for the action completed(waiting time is specific for every action)
+        if pause: key_do([32],frame_repeat=1)#pause the game
         self.take_state(infer=True)
-        #we can add here the object detector
         healths.extend([self.health,self.enemy_health])#we will use it for calculating reward
-        if (self.health<=0 or self.enemy_health<=0):
+        if (self.health<=0 or self.enemy_health<=0):#when health is below zero
             key_do([32],frame_repeat=1)#continue the game
             while True:
+               #We break from the loop when we observe a win-loss-draw
                random_move=np.random.choice(self.names_move,1)[0]
                move=self.movements[random_move]
                do_action(move)
@@ -187,6 +201,7 @@ class Enviroment():
                if self.loss_win():break
                if (self.health==100 and self.enemy_health==100):break
             while True:
+                #Press enter constantly until healths become full
                 key_do([32])#press enter
                 sleep(0.2)
                 self.take_state()
@@ -203,6 +218,8 @@ class Enviroment():
         return previous_state,self.state,reward,info
                    
     def Calc_rew(self,healths):
+        #calculate reward based on healths difference
+        #and in the case of win-loss, add-extract extra reward
         r=0.0
         info="None"
         if self.reward_end >0:info="win"
@@ -215,6 +232,7 @@ class Enviroment():
         return r,info
 
     def loss_win(self):
+        #Based on currents wins-losses find if there is "hand"
         if self.loss==0 and self.wins==0:
             prob1=self.end_net.predict(np.expand_dims(self.state[20:50,17:39,:],axis=0)).tolist()
             prob2=self.end_net.predict(np.expand_dims(self.state[20:50,466:488,:],axis=0)).tolist()
