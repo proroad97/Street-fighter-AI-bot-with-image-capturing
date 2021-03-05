@@ -1,3 +1,4 @@
 1)The game will run on the simulator snes9x-x64. We download the rom of the game(Street Fighter II Turbo ).
 2) We download the application WinSize2 which we will open the game's windows on a prefixed size and position everytime(Download the zip,run the winsize32update.exe and after that we just adjust the sizes and we press ctrl+alt+z ONLY ONE TIME. winsize run on the background so no need for opening)
-3)You should find the coordinates where your windows run on your PC ,so be able to capture the game.
+3)You should find the coordinates where your window run on your PC ,so be able to capture the image.
+4)run the main.py
