@@ -9,7 +9,7 @@ import pyautogui
 --Game's window should be opened in prefixed position and size every time(you can use winSize2 script)
 --Also find the correct coordinates for "mouse-clicking" that we need for opening the game
 --It had been trained only for RUY who is the easiest player to learn
---Color channel is changed(in Gray scale) here because Enviroment needs Colored images for infering healths
+--Color channel is changed(in Gray scale) here because Environment needs Colored images for infering healths but network had be trained on gray images
 
 """
 movements={
@@ -100,5 +100,19 @@ def train(epoch=1,batch=8,steps=1):
         Net.fit(states,[combined,cum_rewards],epochs=1,callbacks=model_checkpoint_callback)
     return rewards
 
-
+def play():
+    end=False
+    while not end:
+        env.take_state(infer=False)
+        state=(env.state).astype("float32")
+        state=np.expand_dims(np.expand_dims(cv2.cvtColor(state,cv2.COLOR_BGR2GRAY),axis=2),axis=0)
+        prob,_=Net(state)
+        act=np.argmax(prob.numpy()[0])
+        print(act)
+        action=movements[names_mov[act]]
+        _,_,_,info=env.step(action,pause=False)
+        if info!="None":end=True
+        sleep(0.25)
+        
+        
 train(epoch=2000,batch=6,steps=1)
