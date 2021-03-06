@@ -37,10 +37,12 @@ def do_action(keys):
             keyboard.release(key)
             sleep(keys[2])
 
+
+
 class Environment():
     def __init__(self,coord):
-        self.coordinates=coord#coordinates (x,y,w,h) of game's window
-        self.end_net=tf.keras.models.load_model(r"C:\Users\PROROAD\Desktop\fighter\loss.h5")#network which infer if you lost or win(based on if there is a "hand" on image)
+        self.coordinates=coord
+        self.end_net=tf.keras.models.load_model(r"C:\Users\PROROAD\Desktop\fighter\loss.h5")#network which infer if you lost or win(based on in ther a "hand" on image)
         self.movements={
     "left":[["left"],0.30,0.0,0.50]
     ,"left-up":[["left","up"],0.30,0.0,0.85]
@@ -87,7 +89,6 @@ class Environment():
     def Open_game(self):
         """
         Opens game,load rom ,waits for the game to load and pause when we enter in the map
-
         """
         def leftClick():
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
@@ -142,28 +143,29 @@ class Environment():
         health=points*100/np.prod(image.shape)
         return health
     
-    def set_gamma(self,gamma):
-        #discount coefficient 
-        self.gamma=gamma
+    def set_gamma(self,ga):
+        #discount coefficient
+        self.gamma=ga
 
     def set_policy_net(self,net,logits=False):
-        #set the network for calcuting policy
+        #set the network for calculating policy
+        #if network returns logits , they are normalized
         self.policy_net=net
         self.logits=logits
 
     def n_steps(self,n=1):
         """
-        Do N actions and calculate discounted reward 
+        Do n actions and calculate discounted reward  
         Returns: Initial state,Final state,discounted reward,infos,first action
         """
         rewards=0
         for i in range(n):
             if self.state is None:self.take_state()
             temp=np.expand_dims(cv2.cvtColor(self.state,cv2.COLOR_BGR2GRAY),axis=2)
-            prob,_=self.policy_net(np.expand_dims(temp,axis=0).astype("float32"))
+            prob,_=self.policy_net(np.expand_dims(temp,axis=0).astype("float32"))#probability distribution
             if self.logits==True:prob=tf.nn.softmax(prob)
             prob=prob.numpy()[0]
-            ind=np.random.choice(self.names_move,p=prob)
+            ind=np.random.choice(self.names_move,p=prob)#selection of actions based on policy
             action=self.names_move.index(ind)
             a=self.step(self.movements[ind])
             previous_state,self.state,rew,info=a
@@ -172,7 +174,7 @@ class Environment():
                 ini_action=action
             rewards*=self.gamma
             rewards+=rew
-            if self.state is None :
+            if self.state is None :#in the case the episode is finished(so on state is none)
                 return ini_state,self.state,rewards,info,ini_action
                 
         return ini_state,self.state,rewards,info,ini_action
@@ -188,20 +190,21 @@ class Environment():
         if pause: sleep(action[3])#waiting for the action completed(waiting time is specific for every action)
         if pause: key_do([32],frame_repeat=1)#pause the game
         self.take_state(infer=True)
+        #we can add here the object detector
         healths.extend([self.health,self.enemy_health])#we will use it for calculating reward
-        if (self.health<=0 or self.enemy_health<=0):#when health is below zero
+        if (self.health<=0 or self.enemy_health<=0):#there are cases where health becomes zero but the episode is not ended
             key_do([32],frame_repeat=1)#continue the game
             while True:
-               #We break from the loop when we observe a win-loss-draw
-               random_move=np.random.choice(self.names_move,1)[0]
+               #do random actions until observe a "hand" or healths are 100%
+               random_move=np.random.choice(self.names_move,1)[0]#do random actions until
                move=self.movements[random_move]
                do_action(move)
                sleep(0.5)
                self.take_state()
-               if self.loss_win():break
-               if (self.health==100 and self.enemy_health==100):break
+               if self.loss_win():break#returns True if there is win-loss
+               if (self.health==100 and self.enemy_health==100):break #in the case of draw
             while True:
-                #Press enter constantly until healths become full
+                #loop for handling menu screen
                 key_do([32])#press enter
                 sleep(0.2)
                 self.take_state()
@@ -218,8 +221,7 @@ class Environment():
         return previous_state,self.state,reward,info
                    
     def Calc_rew(self,healths):
-        #calculate reward based on healths difference
-        #and in the case of win-loss, add-extract extra reward
+        #calculation of reward based on the difference of healths
         r=0.0
         info="None"
         if self.reward_end >0:info="win"
@@ -232,7 +234,8 @@ class Environment():
         return r,info
 
     def loss_win(self):
-        #Based on currents wins-losses find if there is "hand"
+        #Deduce if there is a "hand"
+        #coordinates of hands depend from the current wins
         if self.loss==0 and self.wins==0:
             prob1=self.end_net.predict(np.expand_dims(self.state[20:50,17:39,:],axis=0)).tolist()
             prob2=self.end_net.predict(np.expand_dims(self.state[20:50,466:488,:],axis=0)).tolist()
