@@ -52,6 +52,13 @@ file=r"\training_1\cp.ckpt"
 
 
 def make_batches(env,batch=32,steps=1,gamma=0.95):
+    """ 
+    Make batches of n_steps(bootstrapping)
+
+    Network expects float and Gray images, so we convert states
+
+    Return Initial_state,rewards,next_state,index of finished episodes,actions
+    """
     states=[]
     rewards=[]
     next_states=[]
@@ -62,7 +69,9 @@ def make_batches(env,batch=32,steps=1,gamma=0.95):
         state,next_state,reward,info,action=env.n_steps(steps)
         states.append(np.expand_dims(cv2.cvtColor(state,cv2.COLOR_BGR2GRAY),axis=2))
         rewards.append(reward)
-        if next_state is not None:next_states.append(np.expand_dims(cv2.cvtColor(next_state,cv2.COLOR_BGR2GRAY),axis=2));dones_idx.append(i)
+        if next_state is not None:
+            next_states.append(np.expand_dims(cv2.cvtColor(next_state,cv2.COLOR_BGR2GRAY),axis=2))
+            dones_idx.append(i)
         actions.append(action)   
     rewards=np.array(rewards)    
     next_states=np.array(next_states).astype("float32")
@@ -75,22 +84,21 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=file,sav
 Net.compile(optimizer=opti,loss=[net.policy_loss,'mse'],run_eagerly=True)#Custom loss work only in Eager mode
 
 def train(epoch=1,batch=8,steps=1):
-    
     rewards=[]
+    losses=0
     total_wins=0
     for i in range(epoch):
+        wind=pyautogui.getWindowsWithTitle("snes9x")[0]
         if i%5==0:
-            "in the case computer go inactive"
-            wind=pyautogui.getWindowsWithTitle("snes9x")[0]
+            #activation of the computer every 5 iterations
             try:
                 wind.activate()
             except:
                 pass
         states,cum_rewards,next_states,dones,actions=make_batches(env,batch=batch,steps=1,gamma=0.95)
-        
         rewards.append(cum_rewards.sum()/8)
         if (cum_rewards.sum()/8)>30:
-            print("i breaked in epoch: {}".format(i))
+            print("i break in epoch: {}".format(i))
             break
         print("total reward per episode : {}".format(rewards[i]),"\n epoch:",i )
         _,values=Net(states)
@@ -98,21 +106,25 @@ def train(epoch=1,batch=8,steps=1):
         adva=cum_rewards-values
         combined=tf.stack((adva,actions),axis=1)
         Net.fit(states,[combined,cum_rewards],epochs=1,callbacks=model_checkpoint_callback)
-    return rewards
-
+        
+        
 def play():
-    end=False
-    while not end:
+    try:
+        wind=pyautogui.getWindowsWithTitle("snes9x")[0]
+        wind.activate()
+    except:
+        pass
+    while True:
         env.take_state(infer=False)
         state=(env.state).astype("float32")
         state=np.expand_dims(np.expand_dims(cv2.cvtColor(state,cv2.COLOR_BGR2GRAY),axis=2),axis=0)
-        prob,_=Net(state)
-        act=np.argmax(prob.numpy()[0])
-        print(act)
-        action=movements[names_mov[act]]
-        _,_,_,info=env.step(action,pause=False)
-        if info!="None":end=True
-        sleep(0.25)
+        Prob,_=Net(state)
+        act=np.argmax(Prob.numpy()[0])
+        action=names_mov[act]
+        _,_,_,info=env.step(movements[action],pause=False)
+        if info !="None":break
+
         
         
-train(epoch=2000,batch=6,steps=1)
+train(epoch=20000,batch=6,steps=1)
+play()
