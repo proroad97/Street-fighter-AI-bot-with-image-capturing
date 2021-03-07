@@ -51,7 +51,7 @@ Step method is responsible for sending the moves,handling finished-states and re
 
 Every time a movement is finished the game pause,because we dont want the game continue while training network. Of course if the PC is fast there is no need for pausing because computations are completed instanly.
 
-Next code is handling the situation that healths go to zero. As i mentioned,it is possibly that healths become zero but the game is not ended
+Next code from step function is handling the situation that healths go to zero. As i mentioned,it is possibly that healths become zero but the game is not ended
 
 ![image](https://user-images.githubusercontent.com/70138386/110236945-c6369600-7f41-11eb-9376-b7f72cb6297e.png)
 
