@@ -49,6 +49,18 @@ The simulator understand what buttons the code have send only when we press and 
 Step method is responsible for sending the moves,handling finished-states and returns awards..
 ![image](https://user-images.githubusercontent.com/70138386/110236727-1dd40200-7f40-11eb-88e6-eaf9a42a8b8e.png)
 
+Every time a movement is finished the game pause,because we dont want the game continue while training network. Of course if the PC is fast there is no need for pausing because computations are completed instanly.
 
+Next code is handling the situation that healths go to zero. As i mentioned,it is possibly that healths become zero but the game is not ended
 
+![image](https://user-images.githubusercontent.com/70138386/110236945-c6369600-7f41-11eb-9376-b7f72cb6297e.png)
+
+First loop is responsible for detecting wins-loss(with the help of Loss_win function) or draws. Second is responsible for "restarting" the game in case of win or loss.
+
+Rewards are calculated based on healths difference and if there was an end-episode
+![image](https://user-images.githubusercontent.com/70138386/110237032-4fe66380-7f42-11eb-9861-741423a34a17.png)
+
+A2C usually is used with bootstrapping. N-Bootstrapping is when we make n-steps but we keep only the initial state,the cumulative reward(discounted) and the final state. It is an efficient method for environments that actions that have taken can effect heavily the future,but for street fighter i believe there is no need. Any way, i have written the code for n-steps bootstrapping and is the one that i use for creating my batches.
+
+![image](https://user-images.githubusercontent.com/70138386/110237286-e8311800-7f43-11eb-89cb-e8db2716fd64.png)
 
