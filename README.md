@@ -1,3 +1,7 @@
+
+
+
+
 # Street fighter II BOT based on Enviroment with Image Screenshot
 
 
@@ -26,6 +30,10 @@ The Reinforcement Algorithm that we use is A2C(Advantage-Actor-Critic). Actor an
 
 
 A Entropy loss have been added in the policy loss,in purpose to push the Policy to a more uniform distribution(Entropy has a minimum for the uniform distribution).
+
+
+
+https://user-images.githubusercontent.com/70138386/111294010-8e6ed300-8652-11eb-99ea-fda73a4d6b8e.mp4
 
 - #### Network
 
@@ -66,3 +74,7 @@ A2C usually is used with bootstrapping. N-Bootstrapping is when we make n-steps 
 
 
 Instead of manually handling the game menu , a Reinforcement agent can be generalised to handle loading screens,selection of champion etc. for different games. Also we could add object detection and use the distance of the players or the anchor boxes(coordinates of the box that encircle the champion) for deduce Attack-Defence Position.
+
+
+
+![dda](https://user-images.githubusercontent.com/70138386/111295380-f83bac80-8653-11eb-8eb9-9e0b9fbe6d5f.gif)
