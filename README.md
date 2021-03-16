@@ -64,3 +64,5 @@ A2C usually is used with bootstrapping. N-Bootstrapping is when we make n-steps 
 
 ![image](https://user-images.githubusercontent.com/70138386/110237286-e8311800-7f43-11eb-89cb-e8db2716fd64.png)
 
+
+Instead of manually handling the game menu , a Reinforcement agent can be generalised to handle loading screens,selection of champion etc. for different games. Also we could add object detection and use the distance of the players or the anchor boxes(coordinates of the box that encircle the champion) for deduce Attack-Defence Position.
