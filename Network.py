@@ -1,3 +1,8 @@
+"""
+A module that implement the Networks and policy loss
+Networks share the same weights except the last 2 layers(head and output).For better results could have difference parameters but costly in training time
+"""
+
 from tensorflow.keras.layers import Dense,InputLayer,Conv2D,GlobalMaxPooling2D,Flatten,BatchNormalization
 from tensorflow.keras import Model
 from keras.models import Sequential
@@ -24,6 +29,9 @@ def policy_loss(y_true ,y_pred):
     return loss+const_entropy*entropy
 
 class ActorCritic(tf.keras.Model):
+    """ "random" configuration of layers and improvements are necessary!!!
+         Instead of Batch layer ,you can normalize images
+    """
     def __init__(self,in_shape,n_actions,**kwargs):
         super(ActorCritic,self).__init__(**kwargs)
         self.inpt=InputLayer(input_shape=in_shape,dtype="int32")
@@ -58,5 +66,7 @@ class ActorCritic(tf.keras.Model):
 
     def build_graph(self, raw_shape):
         #function for the visualization of model
+        """For Subclassing Models TF plot functions doesnt work so this method return a Model at which you can call Tensorflow.Model.summary()
+        """
         x = tf.keras.layers.Input(shape=raw_shape)
         return Model(inputs=[x], outputs=self.call(x))
