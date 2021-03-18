@@ -55,9 +55,9 @@ def make_batches(env,batch=32,steps=1,gamma=0.95):
     """ 
     Make batches of n_steps(bootstrapping)
 
-    Network expects float and Gray images, so we convert states
+    Network expects float and Gray images, so we convert them
 
-    Return Initial_state,rewards,next_state,index of finished episodes,actions
+    Returns: Initial_state,rewards,next_state,index of finished episodes,actions
     """
     states=[]
     rewards=[]
@@ -67,6 +67,7 @@ def make_batches(env,batch=32,steps=1,gamma=0.95):
 
     for i in range(batch):
         state,next_state,reward,info,action=env.n_steps(steps)
+        #cv2 returns an image's shape of (h,w) in Gray scale and so it should be added the gray channel
         states.append(np.expand_dims(cv2.cvtColor(state,cv2.COLOR_BGR2GRAY),axis=2))
         rewards.append(reward)
         if next_state is not None:
@@ -98,7 +99,7 @@ def train(epoch=1,batch=8,steps=1):
         states,cum_rewards,next_states,dones,actions=make_batches(env,batch=batch,steps=1,gamma=0.95)
         rewards.append(cum_rewards.sum()/8)
         if (cum_rewards.sum()/8)>30:
-            print("i break in epoch: {}".format(i))
+            print("i breaked in epoch: {}".format(i))
             break
         print("total reward per episode : {}".format(rewards[i]),"\n epoch:",i )
         _,values=Net(states)
@@ -127,4 +128,4 @@ def play():
         
         
 train(epoch=20000,batch=6,steps=1)
-play()
+#play()
