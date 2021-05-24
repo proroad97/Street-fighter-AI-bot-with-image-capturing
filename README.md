@@ -14,7 +14,7 @@ In summary, a simulator runs the game and by captyring the image of the game, we
 *Caution*
 - Game should be opened in prefixed position and size
 
-- Coordinates(x,y,w,h) for image screenshot is different for every user
+- Coordinates(x,y,w,h) for image screenshot are different for every user
 
 
 # Implementation and Theory:
@@ -52,6 +52,7 @@ At first i wanted to use a pre-trained Network for calculating health but no goo
 ![image](https://user-images.githubusercontent.com/70138386/110236087-96d15a80-7f3c-11eb-92a1-6f215fe27377.png)
 
 The simulator understand what buttons the code have send only when we press and release for specific times for each move
+
 ![image](https://user-images.githubusercontent.com/70138386/110236232-53c3b700-7f3d-11eb-8518-c939012bc296.png)
 
 Step method is responsible for sending the moves,handling finished-states and returns awards..
